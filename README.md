@@ -13,5 +13,7 @@ Due to feedback on our proposal, we realized we may accidentally have assigned t
 
  {{Screenshot}}
 
-{{kaggle data link}}
+{{https://www.kaggle.com/berkeleyearth/climate-change-earth-surface-temperature-data}}
+
+
 
