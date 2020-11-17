@@ -24,7 +24,7 @@ Due to feedback on our proposal, we realized we may accidentally have assigned t
 
 
 
-{{A link to the original data source}}
+Link to original data source:
 https://www.kaggle.com/berkeleyearth/climate-change-earth-surface-temperature-data
 
 
