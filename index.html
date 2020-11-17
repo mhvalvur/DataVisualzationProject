@@ -1,1 +1,131 @@
 
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>  
+        <title>Bar chart example</title>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <style>
+            svg {
+                width: 1800px;
+                height: 1200px;
+                border:1px solid gray;  
+            }
+            /* You can set SVG stylings using CSS like this! */
+            rect {
+                fill:lightcoral;
+            }
+
+            .axis-label {
+                font-size:1.2em;
+                font-family:sans-serif;
+                fill:gray;
+            }
+            .title {
+                font-family:sans-serif;
+                font-size:1.6em;
+                fill:gray;
+            }
+            .tick line {
+                stroke: lightgray;
+            }
+            .tick text {
+                fill: gray;
+            }
+        </style>
+    </head>
+    <body>
+        <svg id="barchartSvg" ></svg>
+    </body>
+    <script>
+        const svg = d3.select('#barchartSvg');
+        const width = +svg.style('width').replace('px','');
+        const height = +svg.style('height').replace('px','');
+
+        const margin = { top:40, bottom: 90, right: 20, left: 80 };
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+        
+
+        d3.csv('GlobalLandTemperaturesByMajorCity.csv').then(data => {
+            // console.log(data);
+
+            data.sort(function(a,b) {
+                return +b["Sorted Temperature"] - +a["Sorted Temperature"];
+            });
+
+            data = data.slice(0,10);
+
+
+            data.forEach(d => {
+                d.population = +d["Sorted Temperature"];
+                d.country = d["Sorted City"];
+            });
+
+
+            const xScale = d3.scaleLinear()
+                                .domain([0, d3.max(data, function(d) {  return d.population; })]) // data space
+                                .range([0,innerWidth]); // pixel space
+            const yScale = d3.scaleBand()
+                                .domain(data.map(function(d) { return d.country;}))
+                                .range([0,innerHeight])
+                                .padding(0.1);
+
+
+            const g = svg.append('g')
+                        // .attr('transform', `translate(${margin.left}, ${margin.top})`);
+                        .attr('transform', 'translate('+margin.left+', '+margin.top+')');
+
+            var barchart = g.selectAll('rect')
+                            .data(data)
+                            .enter()
+                            .append('rect')
+                            .attr('y', d => yScale(d.country))
+                            .attr('height',yScale.bandwidth())
+                            .attr('width', function(d) {
+                                return  xScale(d.population);
+                            })
+                            .style("fill", "#69b3a2");
+                            
+
+            const yAxis = d3.axisLeft(yScale);
+            g.append('g').call(yAxis)
+                         .selectAll('.domain, .tick line').remove();
+
+            
+
+            //Probably change units here           
+            const xAxisTickFormat = function(d) { 
+
+                    return d3.format('.3s')(d).replace('G','B') 
+            }
+            const xAxis = d3.axisBottom(xScale)
+                            .tickFormat(xAxisTickFormat)
+                            .tickSize(-innerHeight);                
+            var gXAxis = g.append('g').call(xAxis);
+            // remove the x-axis line 
+            gXAxis.selectAll('.domain').remove();                   
+            gXAxis.attr('transform',`translate(0,${innerHeight})`)
+                            .selectAll("text")                   
+                                .style("text-anchor", "end")
+                                .style("font-size", "34px")     
+                                .attr("dx", "-10px")             
+                                .attr("dy", "0px")               
+                                .attr("transform", "rotate(-45)" );
+            
+            
+            g.append('text')
+                .attr('class','axis-label')
+                .attr('text-anchor','middle')
+                .attr('x',innerWidth/2)
+                .attr('y',innerHeight+70)
+                .text('Degrees Celsius')    
+            g.append('text')
+                .attr('class','title')
+                .attr('y',-10)
+                .text('Average Temperature Increase From 1910 to 2010');
+                
+        });
+    </script>
+</html>
