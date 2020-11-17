@@ -7,4 +7,11 @@ Add at least 1 screenshot documenting your current prototype running. This scree
 Add a link to the original data source, and if the data was pre-processed, describe what you did.
 
 
-Each of us have completed the barebones implementation of the individual visualizations that we have assigned to ourselves.
+Each of us have completed the barebones implementation of the individual visualizations that we have assigned to ourselves. The screenshots of the current progress are included below.
+
+Due to feedback on our proposal, we realized we may accidentally have assigned the same data to be represented in two different charts. Because of this, we have modified which dataset is to be used for which visualization. The bar chart will use temperature by major city, while the flame animated chart will use general global temperatures dataset and perform a multiyear depiction/average.
+
+ {{Screenshot}}
+
+{{kaggle data link}}
+
