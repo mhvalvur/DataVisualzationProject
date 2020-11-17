@@ -11,7 +11,6 @@ Each of us have completed the barebones implementation of the individual visuali
 
 Due to feedback on our proposal, we realized we may accidentally have assigned the same data to be represented in two different charts. Because of this, we have modified which dataset is to be used for which visualization. The bar chart will use temperature by major city, while the flame animated chart will use general global temperatures dataset and perform a multiyear depiction/average.
 
- {{Screenshot}}
  1. Flame Bar Chart Visualization 
  ![image](https://user-images.githubusercontent.com/70309988/99347086-6366a500-2853-11eb-9acf-53fef4e7bdb7.png)
 
