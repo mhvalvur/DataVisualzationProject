@@ -57,6 +57,12 @@ function getExtentsForYear(yearData) {
 
 // Draw the map in the #map svg
 function drawMap() {
+    // add a div to the body of the page
+    var tooltipDiv = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip-temp")
+        .style("opacity", 0);
 
     // create the map projection and geoPath
     let projection = d3
@@ -73,7 +79,7 @@ function drawMap() {
 
     // get the temperature values for all countries for a given year and month
     // let yearData = timeData.filter((d) => d.Year == year)[0];
-    let yearData = getCountryData(temperatureData, '2000', '02');
+    let yearData = getCountryData(temperatureData, '2000', '01');
     // get the min/max GDP values for the selected year
     let extent = getExtentsForYear(yearData);
 
@@ -98,13 +104,24 @@ function drawMap() {
             return colorScale(val);
         })
         .on("mouseover", function(d, i) {
+            tooltipDiv.transition().duration(60).style("opacity", 1);
+            let val = 0;
+            if (i < yearData.length)
+                val = +yearData[i].AverageTemperature.substring(0, 5);
 
+            tooltipDiv
+                .html("Country: " + d.properties.CNTR_NAME + "<br>Temperature: " + val)
+                .style("left", d3.mouse(this)[0] + 35 + "px")
+                .style("top", d3.mouse(this)[1] + 180 + "px");
         })
         .on("mousemove", function(d, i) {
-
+            tooltipDiv
+                .style("left", d3.mouse(this)[0] + 35 + "px")
+                .style("top", d3.mouse(this)[1] + 180 + "px");
         })
         .on("mouseout", function(d, i) {
-
+            // tooltip disappears
+            tooltipDiv.transition().duration(60).style("opacity", 0);
         })
         .on("click", function(d, i) {
 
@@ -159,6 +176,383 @@ function drawMap() {
         )
         .attr("font-size", 8);
 
+    // on change listener for year input select
+    d3.select("#year-input").on("change", function() {
+        mapSvg.selectAll("*").remove();
+
+        let projection = d3
+            .geoMercator()
+            .scale(100)
+            .center(d3.geoCentroid(mapData))
+            .translate([+mapSvg.style("width").replace("px", "") / 2, +mapSvg.style("height").replace("px", "") / 2.3, ]);
+        let path = d3.geoPath().projection(projection);
+
+        year = this.value;
+
+        var selectedMonthOption = document.getElementById("month-select");
+        var selectedMonth =
+            selectedMonthOption.options[selectedMonthOption.selectedIndex].value;
+
+        let yearData = getCountryData(temperatureData, year, selectedMonth);;
+        let extent = getExtentsForYear(yearData);
+
+        var selectedOption = document.getElementById("color-scale-select");
+        var selectedScale =
+            selectedOption.options[selectedOption.selectedIndex].value;
+
+        var colorScale;
+
+        if (selectedScale == "interpolateRdYlGn")
+            colorScale = d3.scaleSequential(d3.interpolateRdYlGn).domain(extent);
+        else if (selectedScale == "interpolateViridis")
+            colorScale = d3.scaleSequential(d3.interpolateViridis).domain(extent);
+        else if (selectedScale == "interpolateBrBG")
+            colorScale = d3.scaleSequential(d3.interpolateBrBG).domain(extent);
+        else if (selectedScale == "interpolateTurbo")
+            colorScale = d3.scaleSequential(d3.interpolateTurbo).domain(extent);
+        else if (selectedScale == "interpolatePlasma")
+            colorScale = d3.scaleSequential(d3.interpolatePlasma).domain(extent);
+
+        // draw the map on the #map svg
+        let g = mapSvg.append("g");
+        g.selectAll("path")
+            .data(mapData.features)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("id", (d) => {
+                return d.properties.CNTR_NAME;
+            })
+            .attr("class", "countrymap")
+            .style("fill", (d, i) => {
+                if (i >= yearData.length) return "white";
+                let val = +yearData[i].AverageTemperature;
+                if (isNaN(val)) return "white";
+                return colorScale(val);
+            })
+            .on("mouseover", function(d, i) {
+                tooltipDiv.transition().duration(60).style("opacity", 1);
+                let val = 0;
+                if (i < yearData.length)
+                    val = +yearData[i].AverageTemperature.substring(0, 5);
+
+                tooltipDiv
+                    .html("Country: " + d.properties.CNTR_NAME + "<br>Temperature: " + val)
+                    .style("left", d3.mouse(this)[0] + 35 + "px")
+                    .style("top", d3.mouse(this)[1] + 180 + "px");
+            })
+            .on("mousemove", function(d, i) {
+                tooltipDiv
+                    .style("left", d3.mouse(this)[0] + 35 + "px")
+                    .style("top", d3.mouse(this)[1] + 180 + "px");
+            })
+            .on("mouseout", function(d, i) {
+                // tooltip disappears
+                tooltipDiv.transition().duration(60).style("opacity", 0);
+            })
+            .on("click", function(d, i) {
+
+            });
+
+        var axisScale = d3
+            .scaleLinear()
+            .domain(extent)
+            .range([0, mapWidth / 3]);
+
+        const xAxis = d3
+            .axisBottom(axisScale)
+            .ticks(mapWidth / 100)
+            .tickSize(-barHeight);
+
+        const defs = mapSvg.append("g");
+
+        const linearGradient = defs
+            .append("linearGradient")
+            .attr("id", "linear-gradient");
+
+        linearGradient
+            .selectAll("stop")
+            .data(
+                colorScale.ticks().map((t, i, n) => ({
+                    offset: `${(100 * i) / n.length}%`,
+                    color: colorScale(t),
+                }))
+            )
+            .enter()
+            .append("stop")
+            .attr("offset", (d) => d.offset)
+            .attr("stop-color", (d) => d.color);
+
+        mapSvg
+            .append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .append("rect")
+            .attr("transform", `translate(${margin.left}, 0)`)
+            .attr("width", mapWidth / 3)
+            .attr("height", barHeight)
+            .style("fill", "url(#linear-gradient)");
+
+        mapSvg
+            .append("g")
+            .call(xAxis)
+            .attr("class", "x-axis")
+            .attr(
+                "transform",
+                `translate(${margin.left},${height - margin.bottom + barHeight})`
+            )
+            .attr("font-size", 8);
+    });
+
+    d3.select("#color-scale-select").on("change", function() {
+        mapSvg.selectAll("*").remove();
+
+        let projection = d3
+            .geoMercator()
+            .scale(100)
+            .center(d3.geoCentroid(mapData))
+            .translate([+mapSvg.style("width").replace("px", "") / 2, +mapSvg.style("height").replace("px", "") / 2.3, ]);
+        let path = d3.geoPath().projection(projection);
+
+        let year = document.getElementById("year-input").value;
+
+        var selectedMonthOption = document.getElementById("month-select");
+        var selectedMonth =
+            selectedMonthOption.options[selectedMonthOption.selectedIndex].value;
+
+        let yearData = getCountryData(temperatureData, year, selectedMonth);;
+        let extent = getExtentsForYear(yearData);
+
+        var selectedScale = this.value;
+        var colorScale;
+
+        if (selectedScale == "interpolateRdYlGn")
+            colorScale = d3.scaleSequential(d3.interpolateRdYlGn).domain(extent);
+        else if (selectedScale == "interpolateViridis")
+            colorScale = d3.scaleSequential(d3.interpolateViridis).domain(extent);
+        else if (selectedScale == "interpolateBrBG")
+            colorScale = d3.scaleSequential(d3.interpolateBrBG).domain(extent);
+        else if (selectedScale == "interpolateTurbo")
+            colorScale = d3.scaleSequential(d3.interpolateTurbo).domain(extent);
+        else if (selectedScale == "interpolatePlasma")
+            colorScale = d3.scaleSequential(d3.interpolatePlasma).domain(extent);
+
+
+        // draw the map on the #map svg
+        let g = mapSvg.append("g");
+        g.selectAll("path")
+            .data(mapData.features)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("id", (d) => {
+                return d.properties.CNTR_NAME;
+            })
+            .attr("class", "countrymap")
+            .style("fill", (d, i) => {
+                if (i >= yearData.length) return "white";
+                let val = +yearData[i].AverageTemperature;
+                if (isNaN(val)) return "white";
+                return colorScale(val);
+            })
+            .on("mouseover", function(d, i) {
+                tooltipDiv.transition().duration(60).style("opacity", 1);
+                let val = 0;
+                if (i < yearData.length)
+                    val = +yearData[i].AverageTemperature.substring(0, 5);
+
+                tooltipDiv
+                    .html("Country: " + d.properties.CNTR_NAME + "<br>Temperature: " + val)
+                    .style("left", d3.mouse(this)[0] + 35 + "px")
+                    .style("top", d3.mouse(this)[1] + 180 + "px");
+            })
+            .on("mousemove", function(d, i) {
+                tooltipDiv
+                    .style("left", d3.mouse(this)[0] + 35 + "px")
+                    .style("top", d3.mouse(this)[1] + 180 + "px");
+            })
+            .on("mouseout", function(d, i) {
+                // tooltip disappears
+                tooltipDiv.transition().duration(60).style("opacity", 0);
+            })
+            .on("click", function(d, i) {
+
+            });
+
+        // update the axis scale also 
+        var axisScale = d3
+            .scaleLinear()
+            .domain(colorScale.domain())
+            .range([0, mapWidth / 3]);
+
+        const xAxis = d3
+            .axisBottom(axisScale)
+            .ticks(mapWidth / 100)
+            .tickSize(-barHeight);
+
+        const defs = mapSvg.append("g");
+
+        const linearGradient = defs
+            .append("linearGradient")
+            .attr("id", "linear-gradient");
+
+        linearGradient
+            .selectAll("stop")
+            .data(
+                colorScale.ticks().map((t, i, n) => ({
+                    offset: `${(100 * i) / n.length}%`,
+                    color: colorScale(t),
+                }))
+            )
+            .enter()
+            .append("stop")
+            .attr("offset", (d) => d.offset)
+            .attr("stop-color", (d) => d.color);
+
+        mapSvg
+            .append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .append("rect")
+            .attr("transform", `translate(${margin.left}, 0)`)
+            .attr("width", mapWidth / 3)
+            .attr("height", barHeight)
+            .style("fill", "url(#linear-gradient)");
+
+        mapSvg
+            .append("g")
+            .call(xAxis)
+            .attr("class", "x-axis")
+            .attr(
+                "transform",
+                `translate(${margin.left},${height - margin.bottom + barHeight})`
+            )
+            .attr("font-size", 8);
+    });
+
+    // apply on change listener for the month
+    d3.select("#month-select").on("change", function() {
+        mapSvg.selectAll("*").remove();
+
+        let projection = d3
+            .geoMercator()
+            .scale(100)
+            .center(d3.geoCentroid(mapData))
+            .translate([+mapSvg.style("width").replace("px", "") / 2, +mapSvg.style("height").replace("px", "") / 2.3, ]);
+        let path = d3.geoPath().projection(projection);
+
+        let year = document.getElementById("year-input").value;
+
+        var selectedMonth = this.value;
+
+        let yearData = getCountryData(temperatureData, year, selectedMonth);;
+        let extent = getExtentsForYear(yearData);
+
+        var selectedOption = document.getElementById("color-scale-select");
+        var selectedScale = selectedOption.options[selectedOption.selectedIndex].value;
+
+        var colorScale;
+
+        if (selectedScale == "interpolateRdYlGn")
+            colorScale = d3.scaleSequential(d3.interpolateRdYlGn).domain(extent);
+        else if (selectedScale == "interpolateViridis")
+            colorScale = d3.scaleSequential(d3.interpolateViridis).domain(extent);
+        else if (selectedScale == "interpolateBrBG")
+            colorScale = d3.scaleSequential(d3.interpolateBrBG).domain(extent);
+        else if (selectedScale == "interpolateTurbo")
+            colorScale = d3.scaleSequential(d3.interpolateTurbo).domain(extent);
+        else if (selectedScale == "interpolatePlasma")
+            colorScale = d3.scaleSequential(d3.interpolatePlasma).domain(extent);
+
+
+        // draw the map on the #map svg
+        let g = mapSvg.append("g");
+        g.selectAll("path")
+            .data(mapData.features)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("id", (d) => {
+                return d.properties.CNTR_NAME;
+            })
+            .attr("class", "countrymap")
+            .style("fill", (d, i) => {
+                if (i >= yearData.length) return "white";
+                let val = +yearData[i].AverageTemperature;
+                if (isNaN(val)) return "white";
+                return colorScale(val);
+            })
+            .on("mouseover", function(d, i) {
+                tooltipDiv.transition().duration(60).style("opacity", 1);
+                let val = 0;
+                if (i < yearData.length)
+                    val = +yearData[i].AverageTemperature.substring(0, 5);
+
+                tooltipDiv
+                    .html("Country: " + d.properties.CNTR_NAME + "<br>Temperature: " + val)
+                    .style("left", d3.mouse(this)[0] + 35 + "px")
+                    .style("top", d3.mouse(this)[1] + 180 + "px");
+            })
+            .on("mousemove", function(d, i) {
+                tooltipDiv
+                    .style("left", d3.mouse(this)[0] + 35 + "px")
+                    .style("top", d3.mouse(this)[1] + 180 + "px");
+            })
+            .on("mouseout", function(d, i) {
+                // tooltip disappears
+                tooltipDiv.transition().duration(60).style("opacity", 0);
+            })
+            .on("click", function(d, i) {
+
+            });
+
+        // update the axis scale also 
+        var axisScale = d3
+            .scaleLinear()
+            .domain(colorScale.domain())
+            .range([0, mapWidth / 3]);
+
+        const xAxis = d3
+            .axisBottom(axisScale)
+            .ticks(mapWidth / 100)
+            .tickSize(-barHeight);
+
+        const defs = mapSvg.append("g");
+
+        const linearGradient = defs
+            .append("linearGradient")
+            .attr("id", "linear-gradient");
+
+        linearGradient
+            .selectAll("stop")
+            .data(
+                colorScale.ticks().map((t, i, n) => ({
+                    offset: `${(100 * i) / n.length}%`,
+                    color: colorScale(t),
+                }))
+            )
+            .enter()
+            .append("stop")
+            .attr("offset", (d) => d.offset)
+            .attr("stop-color", (d) => d.color);
+
+        mapSvg
+            .append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .append("rect")
+            .attr("transform", `translate(${margin.left}, 0)`)
+            .attr("width", mapWidth / 3)
+            .attr("height", barHeight)
+            .style("fill", "url(#linear-gradient)");
+
+        mapSvg
+            .append("g")
+            .call(xAxis)
+            .attr("class", "x-axis")
+            .attr(
+                "transform",
+                `translate(${margin.left},${height - margin.bottom + barHeight})`
+            )
+            .attr("font-size", 8);
+    });
 }
 
 function getCountryData(data, year, month) {
