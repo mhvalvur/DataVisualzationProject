@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="scripts/index.js"></script>
+
+</head>
+
+<body>
+    <div id="wrapper">
+        <hr style="width: 100%" />
+        <h1>Climate Change: Earth Surface Temperature (1743 - 2013)</h1>
+        <h2>Jacob Schmit, Dina Bataq, Markus Valvur</h2>
+        &nbsp;Year:&nbsp;
+        <input id="year-input" type="number" value="2000" /> &nbsp;Month:&nbsp;
+        <select id="month-select">
+        <option value="01">January</option>
+        <option value="02">February</option>
+        <option value="03">March</option>
+        <option value="04">April</option>
+        <option value="05">May</option>
+        <option value="06">June</option>
+        <option value="07">July</option>
+        <option value="08">August</option>
+        <option value="09">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select> &nbsp; &nbsp;Color Scale&nbsp;
+        <select id="color-scale-select">
+        <option value="interpolateRdYlGn">interpolateRdYlGn</option>
+        <option value="interpolateViridis">interpolateViridis</option>
+        <option value="interpolateBrBG">interpolateBrBG</option>
+        <option value="interpolateTurbo">interpolateTurbo</option>
+        <option value="interpolatePlasma">interpolatePlasma</option>
+      </select>
+        <br />
+        <svg id="map"></svg>
+        <br/>
+        <svg id="barchartSvg"></svg>
+        <div>
+            <button id="transitionButton" onclick="showDiv()">Click to See the Global Average Temperature Over Time</button>
+        </div>
+        <br/>
+        <svg id="firechart"></svg>
+        <!-- <svg id="linechart"></svg> -->
+        <br />
+        Source:
+        <a href="https://www.kaggle.com/berkeleyearth/climate-change-earth-surface-temperature-data" target="_blank">Climate Change: Earth Surface Temperature</a
+      >
+    </div>
+  </body>
+  <script src="scripts/barchart.js"></script>
+  <script src="scripts/firechart.js"></script>
+  <script>
+    function showDiv() {
+      document.getElementById('firechart').style.display = "block";
+    }
+  </script>
+</html>
