@@ -3,6 +3,7 @@ Climate Change: Earth Surface Temperature Since 1750
 Dina Bataq
 Jacob Schmit
 Markus Valvur
+![image](https://user-images.githubusercontent.com/70309988/101234748-330a6d80-367f-11eb-8407-ddbf7db57d5b.png)
 
 For this project, we used a Kaggle dataset titled Climate Change: Earth Surface Temperature. The data contained five different sets of data but we chose to go with three .csv files only. The team decided to present the data using three visualizations techniques; Map, Bar Chart and a Fire Bar Chart. The project displays the world map first as a main visualization which has a very interesting feature to represent the data in addition to giving the user the ability to change the colors of the map, the month, and the year. There is a tooltip that displays the average temperature for the country actively hovered over with the cursor. The second visualization is displayed after the user clicks on any country in the world map. The bar chart displays the top five major cities in the world that have the most climate change. The final visualization is the fire chart which starts an animation of changing colors based on the average world temperature during the specified year.
 
