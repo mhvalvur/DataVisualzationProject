@@ -25,16 +25,16 @@ Reflection
 
 Team workload
 
-Map Visualization: This task was assigned to Dina. Dina was responsible for the entire visualization and it was completed by the due date. 
+-Map Visualization: This task was assigned to Dina. Dina was responsible for the entire visualization and it was completed by the due date. 
 
-Adding the interaction between the map and the bar chart: This task was assigned to Dina and it was completed before the due date.
+-Adding the interaction between the map and the bar chart: This task was assigned to Dina and it was completed before the due date.
 
-Bar Chart: This task was assigned to Jacob and it was completed by the due date.
+-Bar Chart: This task was assigned to Jacob and it was completed by the due date.
 
-Adding the interaction between the Bar Chart and the Fire Chart: This task task was assigned to Jacob and it was completed by the due date.
+-Adding the interaction between the Bar Chart and the Fire Chart: This task task was assigned to Jacob and it was completed by the due date.
 
-Fire Chart: This task was assigned to Markus and it was completed by the due date.
+-Fire Chart: This task was assigned to Markus and it was completed by the due date.
 
-Putting the whole project together: This task was assigned to Jacob. Jacob put the three visualizations together in one project. 
+-Putting the whole project together: This task was assigned to Jacob. Jacob put the three visualizations together in one project. 
 
-Communications: The team used WhatsApp to communicate through the entire time of the project in addition to having couple meetings to discuss the data and the visualization we liked to present.
+-Communications: The team used WhatsApp to communicate through the entire time of the project in addition to having couple meetings to discuss the data and the visualization we liked to present.
